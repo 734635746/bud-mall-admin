@@ -8,24 +8,35 @@
       fit
       highlight-current-row
     >
-      <el-table-column align="center" label="ID" width="95" prop="id"/>
-      <el-table-column label="账号" prop="account"/>
-      <el-table-column label="昵称" prop="nickname"/>
-      <el-table-column label="账号状态" prop="dataStatus"/>
-      <el-table-column label="权限Id" prop="roleId"/>
+      <el-table-column align="center" label="ID" width="95" prop="id" />
+      <el-table-column label="账号" prop="account" />
+      <el-table-column label="昵称" prop="nickname" />
+      <el-table-column label="账号状态" prop="dataStatus" />
+      <el-table-column label="权限Id" prop="roleId" />
       <el-table-column label="头像" width="110" align="center">
         <template slot-scope="scope">
           <span><img class="avatar" :src="scope.row.avatar"></span>
         </template>
       </el-table-column>
-      <el-table-column label="创建时间" prop="createTime" :formatter="timeFormatter"/>
+      <el-table-column label="创建时间" prop="createTime" :formatter="timeFormatter" />
       <el-table-column fixed="right" label="操作" width="100">
         <template slot-scope="scope">
-          <el-button @click="edit(scope.$index)" type="text" size="small">编辑</el-button>
-          <el-button @click="del(scope.$index)" type="text" size="small">删除</el-button>
+          <el-button type="text" size="small" @click="edit(scope.$index)">编辑</el-button>
+          <el-button type="text" size="small" @click="del(scope.$index)">删除</el-button>
         </template>
       </el-table-column>
     </el-table>
+    <!--分页组件-->
+    <el-pagination
+      :current-page="pagination.p"
+      :page-size="pagination.size"
+      :total="pagination.total"
+      :pager-count="7"
+      background
+      style="margin-top:20px; padding:50px 0; text-align:center"
+      layout="total, prev, pager, next, jumper"
+      @current-change="loadList"
+    />
   </div>
 </template>
 
@@ -49,9 +60,9 @@ export default {
       list: [],
       loading: false,
       pagination: {
-        p: 1,
-        size: 10,
-        total: 0,
+        p: 1, // 页码
+        size: 4, // 每页记录数
+        total: 0, // 总记录数
         order: 'id desc'
       }
     }
@@ -60,7 +71,8 @@ export default {
     this.loadList()
   },
   methods: {
-    loadList() {
+    loadList(page = 1) {
+      this.pagination.p = page
       this.loading = true
       getList(this.pagination.p, this.pagination.size).then(res => {
         const data = res.data

@@ -17,9 +17,9 @@ service.interceptors.request.use(
     if (store.getters.token) {
       config.headers['authToken'] = getToken()
     }
-    if (config.method === 'post') {
-      config.data = qs.stringify(config.data)
-    }
+    // if (config.method === 'post') {
+    //  config.data = qs.stringify(config.data)
+    // }
     return config
   },
   error => {
@@ -71,5 +71,5 @@ service.interceptors.response.use(
     return Promise.reject(error)
   }
 )
-service.defaults.headers.post['Content-Type'] = 'application/x-www-form-urlencoded'
+// service.defaults.headers.post['Content-Type'] = 'application/x-www-form-urlencoded'
 export default service

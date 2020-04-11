@@ -71,7 +71,7 @@ export const constantRoutes = [
       {
         path: 'add',
         component: () => import('@/views/admin-user/add'),
-        meta: { title: '新增管理员',icon: 'add'  }
+        meta: { title: '新增管理员', icon: 'add' }
       },
       {
         path: 'edit/:id',
