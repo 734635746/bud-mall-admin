@@ -16,6 +16,23 @@ export function getInfo(id) {
   })
 }
 
+export function add(data) {
+  return request({
+    url: '/user',
+    method: 'post',
+    data
+  })
+}
+
+export function update(param) {
+  const data = { adminUser: param }
+  return request({
+    url: '/user',
+    method: 'put',
+    data
+  })
+}
+
 export function del(id) {
   const url = '/user/' + id
   return request({

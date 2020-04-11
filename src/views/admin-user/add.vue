@@ -7,6 +7,9 @@
       <el-form-item label="昵称" prop="nickname">
         <el-input v-model="data.nickname"/>
       </el-form-item>
+      <el-form-item label="密码" prop="loginPwd">
+        <el-input v-model="data.loginPwd"/>
+      </el-form-item>
       <el-form-item label="头像" prop="avatar">
         <el-input v-model="data.avatar"/>
       </el-form-item>
@@ -27,7 +30,7 @@
 </template>
 
 <script>
-import { getInfo, update } from '@/api/admin-user'
+import { add } from '@/api/admin-user'
 
 export default {
   data() {
@@ -42,20 +45,32 @@ export default {
         callback()
       }
     }
+    const validatePassword = (rule, value, callback) => {
+      const regex = /^[A-Za-z0-9$@#%^&]{6,20}$/g
+      if (value === '') {
+        callback(new Error('请输入密码'))
+      } else {
+        if (!regex.test(value)) {
+          callback(new Error('密码只能由字母、数字、$、@、#、%、^、&构成,最少6位最高20位！'))
+        }
+        callback()
+      }
+    }
     return {
       data: {
         id: 0,
         account: '',
         nickname: '',
+        loginPwd: '',
         avatar: '',
         roleId: 0,
-        loginPwd: '',
         dataStatus: 0,
         createTime: 0
       },
       formRules: {
         account: [{ validator: validateAccount, trigger: 'blur' }],
-        nickname: [{ required: true, trigger: 'blur', message: '昵称不能为空' }]
+        nickname: [{ required: true, trigger: 'blur', message: '昵称不能为空' }],
+        loginPwd: [{ validator: validatePassword, trigger: 'blur' }]
       },
       dataStatusList: [
         { value: 1, label: '待审核' },
@@ -68,28 +83,16 @@ export default {
     }
   },
   mounted() {
-    const params = this.$route.params
-    this.data.id = params.id
-    this.loadInfo()
   },
   methods: {
-    loadInfo() {
-      if (this.data.id > 0) {
-        getInfo(this.data.id).then(res => {
-          this.data = res.data
-        }).catch(err => {
-          this.$message.error('获取管理员信息失败:' + err)
-        })
-      }
-    },
     onSubmit() {
       this.$refs.adminUserForm.validate((valid) => {
         if (valid) {
-          update(this.data).then(res => {
-            this.$message.success('更新管理员成功')
+          add(this.data).then(res => {
+            this.$message.success('添加管理员成功')
             this.$router.push({ path: '/admin-user/list' })
           }).catch(err => {
-            this.$message.error('更新管理员失败:' + err)
+            this.$message.error('新增管理员失败:' + err)
           })
         } else {
           return false
