@@ -24,8 +24,7 @@ export function add(data) {
   })
 }
 
-export function update(param) {
-  const data = { adminUser: param }
+export function update(data) {
   return request({
     url: '/user',
     method: 'put',
