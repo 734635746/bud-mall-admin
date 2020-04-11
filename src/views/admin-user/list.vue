@@ -1,5 +1,18 @@
 <template>
   <div class="app-container">
+
+    <!--条件查询-->
+    <el-form :inline="true" class="demo-form-inline">
+
+      <el-form-item>
+        <el-input v-model="searchObj.name" placeholder="管理员昵称" />
+      </el-form-item>
+
+      <el-button type="primary" icon="el-icon-search" @click="loadList()">查询</el-button>
+      <el-button type="default" @click="resetData()">清空</el-button>
+
+    </el-form>
+
     <el-table
       v-loading="loading"
       :data="list"
@@ -64,7 +77,8 @@ export default {
         size: 4, // 每页记录数
         total: 0, // 总记录数
         order: 'id desc'
-      }
+      },
+      searchObj: { name: '' }
     }
   },
   created() {
@@ -74,7 +88,7 @@ export default {
     loadList(page = 1) {
       this.pagination.p = page
       this.loading = true
-      getList(this.pagination.p, this.pagination.size).then(res => {
+      getList(this.pagination.p, this.pagination.size, this.searchObj.name).then(res => {
         const data = res.data
         this.pagination.total = data.total
         this.list = data.records
@@ -99,6 +113,10 @@ export default {
     },
     timeFormatter(row) {
       return DateUtil.format(row.createTime)
+    },
+    resetData() { // 清空
+      this.searchObj = { name: '' }
+      this.loadList()
     }
   }
 }

@@ -1,22 +1,23 @@
 <template>
   <div class="app-container">
+
     <el-form ref="adminUserForm" :model="data" :rules="formRules" label-width="120px">
       <el-form-item label="账号" prop="account">
-        <el-input v-model="data.account"/>
+        <el-input v-model="data.account" disabled="true" />
       </el-form-item>
       <el-form-item label="昵称" prop="nickname">
-        <el-input v-model="data.nickname"/>
+        <el-input v-model="data.nickname" />
       </el-form-item>
       <el-form-item label="头像" prop="avatar">
-        <el-input v-model="data.avatar"/>
+        <el-input v-model="data.avatar" />
       </el-form-item>
       <el-form-item label="账号状态" prop="dataStatus">
         <el-select v-model="data.dataStatus" placeholder="选择账号状态">
-          <el-option v-for="status in dataStatusList" :label="status.label" :value="status.value"/>
+          <el-option v-for="status in dataStatusList" :label="status.label" :value="status.value" />
         </el-select>
       </el-form-item>
       <el-form-item label="roleId" prop="roleId">
-        <el-input v-model="data.roleId"/>
+        <el-input v-model="data.roleId" />
       </el-form-item>
       <el-form-item>
         <el-button type="primary" @click="onSubmit">保存</el-button>

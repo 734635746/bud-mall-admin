@@ -1,7 +1,7 @@
 import request from '@/utils/request'
 
-export function getList(page, pageSize) {
-  const url = '/user/' + page + '/' + pageSize
+export function getList(page, pageSize, name) {
+  const url = '/user/' + page + '/' + pageSize + '?nickname=' + name
   return request({
     url: url,
     method: 'get'
