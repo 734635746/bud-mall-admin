@@ -39,12 +39,6 @@ service.interceptors.response.use(
     const res = response.data
     // 接口返回数据非成功状态
     if (res.code !== 0) {
-      Message({
-        message: res.msg || 'Error',
-        type: 'error',
-        duration: 5 * 1000
-      })
-
       if (res.code === 1000) {
         MessageBox.confirm('您已退出登录，是否重新登录？', '退出登录', {
           confirmButtonText: '确定',
@@ -56,7 +50,7 @@ service.interceptors.response.use(
           })
         })
       }
-      return Promise.reject(new Error(res.message || 'Error'))
+      return Promise.reject(new Error(res.msg || 'Error'))
     } else {
       return res
     }
