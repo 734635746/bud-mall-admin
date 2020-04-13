@@ -36,6 +36,7 @@
         <template slot-scope="scope">
           <el-button type="text" size="small" @click="edit(scope.$index)">编辑</el-button>
           <el-button type="text" size="small" @click="del(scope.$index)">删除</el-button>
+          <el-button type="text" size="small" @click="forbid(scope.$index)">禁止登陆</el-button>
         </template>
       </el-table-column>
     </el-table>
@@ -54,7 +55,7 @@
 </template>
 
 <script>
-import { del, getList } from '@/api/admin-user'
+import { del, getList, forbid } from '@/api/admin-user'
 import DateUtil from '../../utils/DateUtil'
 
 export default {
@@ -98,17 +99,45 @@ export default {
         this.loading = false
       })
     },
+    forbid(index) {
+      const data = this.list[index]
+
+      this.$confirm('确定禁止该管理员登陆?', '提示', {
+        confirmButtonText: '确定',
+        cancelButtonText: '取消',
+        type: 'warning'
+      }).then(() => {
+        return forbid(data.id)
+      }).then(() => { // 上一个then成功则返回这里
+        this.loadList()// 刷新页面
+        this.$message.success('禁止该管理员登陆成功')
+      }).catch((response) => {
+        if (response === 'cancel') {
+          this.$message.info('已取消操作')
+        }
+      })
+    },
     edit(index) {
       const data = this.list[index]
       this.$router.push({ path: '/admin-user/edit/' + data.id })
     },
     del(index) {
       const data = this.list[index]
-      del(data.id).then(res => {
-        this.$message.success('删除成功')
+
+      this.$confirm('确定删除该管理员?', '提示', {
+        confirmButtonText: '确定',
+        cancelButtonText: '取消',
+        type: 'warning'
+      }).then(() => {
+        return del(data.id)
+      }).then(() => { // 上一个then成功则返回这里
         this.list.splice(index, 1)
-      }).catch(err => {
-        this.$message.error('删除失败:' + err)
+        this.loadList()// 刷新页面
+        this.$message.success('删除成功')
+      }).catch((response) => {
+        if (response === 'cancel') {
+          this.$message.info('已取消删除')
+        }
       })
     },
     timeFormatter(row) {

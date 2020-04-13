@@ -8,6 +8,32 @@
       <el-form-item label="昵称" prop="nickname">
         <el-input v-model="data.nickname" />
       </el-form-item>
+      <el-form-item label="头像">
+        <!--头像缩略图-->
+        <pan-thumb :image="data.avatar" />
+        <!--文件上传按钮-->
+        <el-button type="primary" icon="el-icon-upload" @click="imagecropperShow=true">
+          更换头像
+        </el-button>
+        <!--
+            v-show 是否显示上传组件
+            :key   类似于id 如果一个页面有多个上传控件，可以做区分
+            ：url  上传url
+            @close 关闭上传组件
+            @crop-upload-success 上传成功的回调
+          -->
+        <image-cropper
+          v-show="imagecropperShow"
+          :key="imagecropperKey"
+          :width="300"
+          :height="300"
+          :max-size="2048"
+          :url="'/file'"
+          field="file"
+          @close="close"
+          @crop-upload-success="cropSuccess"
+        />
+      </el-form-item>
       <el-form-item label="头像" prop="avatar">
         <el-input v-model="data.avatar" />
       </el-form-item>
@@ -29,8 +55,13 @@
 
 <script>
 import { getInfo, update } from '@/api/admin-user'
+import ImageCropper from '@/components/ImageCropper'
+import PanThumb from '@/components/PanThumb'
 
 export default {
+  components: {
+    ImageCropper, PanThumb
+  },
   data() {
     const validateAccount = (rule, value, callback) => {
       const regex = /^[A-Za-z0-9]{4,20}$/g
@@ -65,7 +96,9 @@ export default {
         { value: 4, label: '禁用' },
         { value: 5, label: '停用' },
         { value: 6, label: '冻结' }
-      ]
+      ],
+      imagecropperShow: false, // 是否显示上传组件
+      imagecropperKey: 0
     }
   },
   mounted() {
@@ -99,6 +132,20 @@ export default {
     },
     onCancel() {
       this.$router.push({ path: '/admin-user/list' })
+    },
+    // 上传文件成功的回调
+    cropSuccess(data) {
+      this.imagecropperShow = false
+      this.imagecropperKey = this.imagecropperKey + 1
+
+      // 获取后端服务器的返回值
+      this.data.avatar = data.url
+    },
+
+    // 关闭文件上传组件
+    close() {
+      this.imagecropperShow = false
+      this.imagecropperKey = this.imagecropperKey + 1
     }
   }
 }

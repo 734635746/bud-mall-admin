@@ -39,3 +39,11 @@ export function del(id) {
     method: 'delete'
   })
 }
+
+export function forbid(id) {
+  const url = '/user/' + id + '/loginPermit'
+  return request({
+    url: url,
+    method: 'delete'
+  })
+}
