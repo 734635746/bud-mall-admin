@@ -60,24 +60,40 @@ export const constantRoutes = [
     component: Layout,
     redirect: '/admin-user/list',
     name: '管理员管理',
-    meta: { title: '管理员管理', icon: 'form' },
+    meta: { title: '管理员管理', icon: 'peoples' },
     alwaysShow: true,
     children: [
       {
         path: 'list',
         component: () => import('@/views/admin-user/list'),
-        meta: { title: '管理员列表', icon: 'form' }
+        meta: { title: '管理员列表', icon: 'list' }
       },
       {
         path: 'add',
         component: () => import('@/views/admin-user/add'),
-        meta: { title: '新增管理员', icon: 'add' }
+        meta: { title: '新增管理员', icon: 'user' }
       },
       {
         path: 'edit/:id',
         component: () => import('@/views/admin-user/edit'),
         meta: { title: '编辑管理员' },
         hidden: true
+      }
+    ]
+  },
+
+  {
+    path: '/product-category',
+    component: Layout,
+    redirect: '/product-category/list',
+    name: '商品分类管理',
+    meta: { title: '商品分类管理', icon: 'form' },
+    alwaysShow: true,
+    children: [
+      {
+        path: 'list',
+        component: () => import('@/views/product-category/list'),
+        meta: { title: '商品分类列表', icon: 'list' }
       }
     ]
   },

@@ -34,9 +34,6 @@
           @crop-upload-success="cropSuccess"
         />
       </el-form-item>
-      <el-form-item label="头像" prop="avatar">
-        <el-input v-model="data.avatar" />
-      </el-form-item>
       <el-form-item label="账号状态" prop="dataStatus">
         <el-select v-model="data.dataStatus" placeholder="选择账号状态">
           <el-option v-for="status in dataStatusList" :label="status.label" :value="status.value" />
