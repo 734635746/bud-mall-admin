@@ -16,6 +16,13 @@ export default {
       method: 'POST',
       data: productCategory
     })
+  },
+  updateProductCategory(productCategory) { // 修改商品分类
+    return request({
+      url: `${api_name}`,
+      method: 'PUT',
+      data: productCategory
+    })
   }
 
 }

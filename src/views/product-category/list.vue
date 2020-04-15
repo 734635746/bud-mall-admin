@@ -28,18 +28,18 @@
           <el-button
             type="text"
             size="mini"
-            @click="()=>remove(node,data)"
+            @click="()=>{dialogFormVisible=true,PaddingCategory(data)}"
           >
-            删除
+            修改
           </el-button>
         </span>
       </span>
     </el-tree>
 
     <!--添加分类的文本框-->
-    <el-dialog :visible.sync="dialogFormVisible" title="添加分类">
-      <el-form :model="category" label-width="120px">
-        <el-form-item label="分类名称">
+    <el-dialog :visible.sync="dialogFormVisible" title="添加/修改分类">
+      <el-form :model="category" label-width="120px" :rules="formRules">
+        <el-form-item label="分类名称" prop="categoryName">
           <el-input v-model="category.categoryName" />
         </el-form-item>
 
@@ -66,8 +66,8 @@
         </el-form-item>
       </el-form>
       <div slot="footer" class="dialog-footer">
-        <el-button @click="flushCategroy()">取 消</el-button>
-        <el-button type="primary" @click="addCategory()">确 定</el-button>
+        <el-button @click="()=>{dialogFormVisible = false}">取 消</el-button>
+        <el-button type="primary" @click="addOrUpdateCategory()">确 定</el-button>
       </div>
     </el-dialog>
 
@@ -79,6 +79,7 @@ import categoryApi from '@/api/product-category'
 import { getToken } from '@/utils/auth'
 
 const defaultCategory = {
+  categoryId: 0,
   parentId: 0,
   categoryName: '',
   icon: '',
@@ -98,15 +99,29 @@ export default {
       dialogFormVisible: false,
       // 添加分类信息
       category: {
-        parentId: 0,
+        categoryId: 0, // 分类id，修改时有效
+        parentId: 0, // 父级id，添加时有效
         categoryName: '',
         icon: '',
         sort: 0
       },
-      headers: { 'authToken': getToken() }
+      headers: { 'authToken': getToken() },
+      // 表单校验
+      formRules: {
+        categoryName: [{ required: true, trigger: 'blur', message: '分类名称不能为空' }]
+      }
     }
   },
-
+  watch: {
+    dialogFormVisible(val) {
+      if (val === false) { // 监听文本框的状态，关闭文本框怎进行数据刷新
+        // 刷新catagory数据
+        this.category = { ...defaultCategory }
+        // 清除文件上传控件的文件列表
+        this.$refs.upload.clearFiles()
+      }
+    }
+  },
   created() {
     // 创建页面的时候拉取远程数据
     this.fetchCategoryList()
@@ -119,25 +134,32 @@ export default {
         }
       })
     },
-    addCategory() { // 添加商品分类
+    addOrUpdateCategory() { // 添加或者修改商品分类
       console.log(this.category)
-      categoryApi.addProductCategory(this.category).then(response => {
-        if (response.code === 0) {
-          this.$message.success('添加成功')
-          // 刷新分类信息
-          this.flushCategroy()
-          // 刷新页面
-          this.fetchCategoryList()
-        }
-      })
+      if (this.category.categoryId === 0) { // 添加操作
+        categoryApi.addProductCategory(this.category).then(response => {
+          if (response.code === 0) {
+            this.$message.success('添加成功')
+            // 关闭选项框
+            this.dialogFormVisible = false
+            // 刷新页面
+            this.fetchCategoryList()
+          }
+        })
+      } else { // 修改操作
+        categoryApi.updateProductCategory(this.category).then(response => {
+          if (response.code === 0) {
+            this.$message.success('修改成功')
+            // 关闭选项框
+            this.dialogFormVisible = false
+            // 刷新页面
+            this.fetchCategoryList()
+          }
+        })
+      }
     },
-    flushCategroy() { // 取消添加分类
-      // 关闭选项框
-      this.dialogFormVisible = false
-      // 刷新分类信息
-      this.category = { ...defaultCategory }
-      // 清除文件上传控件的文件列表
-      this.$refs.upload.clearFiles()
+    PaddingCategory(data) { // 修改商品分类信息时，填充信息
+      this.category = data
     },
     handleExceed() { // 超出文件上传个数
       this.$message.info('最多只能上传一个文件,您可以选择删除之前的文件')
@@ -149,7 +171,6 @@ export default {
       this.$message.success('文件上传成功')
 
       this.category.icon = response.data.url
-      console.log(this.category.icon)
     },
     fileUploadError() {
       this.$message.error('文件上传失败')
