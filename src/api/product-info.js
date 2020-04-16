@@ -10,6 +10,14 @@ export default {
       method: 'GET',
       params: searchObj
     })
+  },
+
+  addProductInfo(productInfo) { // 添加商品
+    return request({
+      url: `${api_name}`,
+      method: 'POST',
+      params: productInfo
+    })
   }
 
 }
