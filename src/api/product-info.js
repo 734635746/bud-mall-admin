@@ -16,7 +16,7 @@ export default {
     return request({
       url: `${api_name}`,
       method: 'POST',
-      params: productInfo
+      data: productInfo
     })
   }
 

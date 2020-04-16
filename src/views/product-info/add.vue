@@ -85,9 +85,6 @@
       <el-form-item label="商品介绍" prop="intro">
         <tinymce v-model="productInfo.intro" :height="300" />
       </el-form-item>
-      <el-form-item label="商品服务" prop="services">
-        <el-input v-model="productInfo.services" />
-      </el-form-item>
 
       <el-form-item label="商品服务">
         <template>
@@ -104,13 +101,101 @@
       </el-form-item>
 
       <el-form-item label="SKU列表" prop="skuList">
-        <el-input v-model="productInfo.skuList" />
+        <el-button type="primary" @click="dialogFormVisible=true">添加商品SKU</el-button>
+        <!--SKU列表-->
+        <template>
+          <el-table v-if="productInfo.skuList.length!=0" :data="productInfo.skuList" style="width: 100%">
+            <el-table-column label="SKU名称" width="180">
+              <template slot-scope="scope">
+                <el-tag size="medium">{{ scope.row.skuName }}</el-tag>
+              </template>
+            </el-table-column>
+
+            <el-table-column label="价格" width="180">
+              <template slot-scope="scope">
+                <span style="margin-left: 10px">{{ scope.row.price }}</span>
+              </template>
+            </el-table-column>
+
+            <el-table-column label="原价" width="180">
+              <template slot-scope="scope">
+                <span style="margin-left: 10px">{{ scope.row.originPrice }}</span>
+              </template>
+            </el-table-column>
+
+            <el-table-column label="库存" width="180">
+              <template slot-scope="scope">
+                <span style="margin-left: 10px">{{ scope.row.stock }}</span>
+              </template>
+            </el-table-column>
+
+            <el-table-column label="SKU图片" width="180">
+              <template slot-scope="scope">
+                <span><img class="picture" :src="scope.row.picture"></span>
+              </template>
+            </el-table-column>
+
+            <!-- <el-table-column label="操作">
+              <template slot-scope="scope">
+                <el-button
+                  size="mini"
+                  @click="handleEdit(scope.$index, scope.row)"
+                >编辑</el-button>
+                <el-button
+                  size="mini"
+                  type="danger"
+                  @click="handleDelete(scope.$index, scope.row)"
+                >删除</el-button>
+              </template>
+            </el-table-column> -->
+          </el-table>
+        </template>
       </el-form-item>
+
       <el-form-item>
         <el-button type="primary" @click="onSubmit">保存</el-button>
         <el-button @click="onCancel">取消</el-button>
       </el-form-item>
     </el-form>
+
+    <!--添加SKU分类的文本框-->
+    <el-dialog :visible.sync="dialogFormVisible" title="添加SKU">
+      <el-form :model="sku" label-width="120px" :rules="skuRules">
+        <el-form-item label="SKU名称" prop="skuName">
+          <el-input v-model="sku.skuName" />
+        </el-form-item>
+        <el-form-item label="价格" prop="price">
+          <el-input v-model="sku.price" />
+        </el-form-item>
+        <el-form-item label="原价" prop="originPrice">
+          <el-input v-model="sku.originPrice" />
+        </el-form-item>
+        <el-form-item label="库存" prop="stock">
+          <el-input v-model="sku.stock" />
+        </el-form-item>
+        <el-form-item label="SKU图片">
+          <el-upload
+            ref="upload"
+            class="upload-demo"
+            action="/admapi/file"
+            :headers="headers"
+            :limit="1"
+            :on-success="fileUploadSuccess"
+            :on-error="fileUploadError"
+            :auto-upload="false"
+          >
+            <el-button slot="trigger" size="small" type="primary">选取图标</el-button>
+            <el-button style="margin-left: 10px;" size="small" type="success" @click="submitUpload">上传</el-button>
+            <div slot="tip" class="el-upload__tip">只能上传jpg/png文件，且不超过500kb</div>
+          </el-upload>
+        </el-form-item>
+      </el-form>
+
+      <div slot="footer" class="dialog-footer">
+        <el-button @click="()=>{dialogFormVisible = false}">取 消</el-button>
+        <el-button type="primary" @click="addSku()">确 定</el-button>
+      </div>
+    </el-dialog>
 
   </div>
 
@@ -143,6 +228,13 @@ export default {
         services: '',
         skuList: []
       },
+      sku: {// sku临时对象
+        skuName: '',
+        price: 0,
+        originPrice: 0,
+        stock: 0,
+        picture: ''
+      },
       productBrandList: [], // 商品品牌列表
       productServiceList: [], // 商品服务列表
       productCategoryList: [], // 商品分类列表
@@ -152,14 +244,31 @@ export default {
       categorySecondId: 0, // 二级分类id
       categoryThirdId: 0, // 三级分类id
       serviceIds: [], // 服务id数组
+      dialogFormVisible: false, // 添加sku文本框显示状态
       headers: { 'authToken': getToken() },
       // 校验规则
       rules: {
         productName: [{ required: true, message: '请输入商品名称', trigger: 'blur' }],
         categoryId: [{ required: true, message: '请选择商品分类', trigger: 'change' }],
         brandId: [{ required: true, message: '请选择商品品牌', trigger: 'change' }]
+      },
+      skuRules: {}
+    }
+  },
+  watch: {
+    dialogFormVisible(val) {
+      if (val === false) { // 监听文本框的状态，关闭文本框怎进行数据刷新
+        // 刷新catagory数据
+        this.sku = {// sku临时对象
+          skuName: '',
+          price: 0,
+          originPrice: 0,
+          stock: 0,
+          picture: ''
+        }
+        // 清除文件上传控件的文件列表
+        this.$refs.upload.clearFiles()
       }
-
     }
   },
   created() {
@@ -181,8 +290,10 @@ export default {
   },
   methods: {
     onSubmit() { // 提交添加
+      console.log(this.productInfo)
       productInfoApi.addProductInfo(this.productInfo).then(response => {
-
+        this.$message.success('添加成功')
+        this.$router.push({ path: '/product-info/list' })
       })
     },
     onCancel() {
@@ -220,6 +331,24 @@ export default {
     },
     handleServiceChange(val) {
       console.log(val)
+    },
+    submitUpload() { // 上传SKU图片
+      this.$refs.upload.submit()
+    },
+    fileUploadSuccess(response) {
+      this.$message.success('文件上传成功')
+      this.sku.picture = response.data.url
+      console.log(this.sku.picture)
+    },
+    fileUploadError() {
+      this.$message.error('文件上传失败')
+    },
+    addSku() { // 添加SKU信息
+      // 添加SKU
+      this.productInfo.skuList.push(this.sku)
+      // 关闭文本框
+      this.dialogFormVisible = false
+      this.$message.success('添加成功')
     }
   }
 }
@@ -230,4 +359,8 @@ export default {
   position: relative;
   line-height: normal;
 }
+.picture {
+    width: 100px;
+    height: auto;
+  }
 </style>
