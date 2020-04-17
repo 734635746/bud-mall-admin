@@ -114,6 +114,12 @@ export const constantRoutes = [
         path: 'add',
         component: () => import('@/views/product-info/add'),
         meta: { title: '添加商品', icon: 'add' }
+      },
+      {
+        path: 'edit/:id',
+        component: () => import('@/views/product-info/edit'),
+        meta: { title: '编辑商品' },
+        hidden: true
       }
     ]
   },

@@ -1,7 +1,7 @@
 <template>
   <div class="app-container">
-    <el-form ref="productInfoForm" :model="productInfo" label-width="120px" :rules="rules">
 
+    <el-form ref="productInfoForm" :model="productInfo" label-width="120px" :rules="rules">
       <!--商品分类-->
       <el-form-item label="商品分类" prop="categoryId">
         <!--一级分类-->
@@ -62,6 +62,7 @@
           class="upload-demo"
           action="/admapi/file"
           :on-success="handleSuccess"
+          :file-list="fileList"
           :headers="headers"
           list-type="picture"
         >
@@ -78,6 +79,9 @@
       </el-form-item>
       <el-form-item label="库存" prop="stock">
         <el-input v-model="productInfo.stock" />
+      </el-form-item>
+      <el-form-item label="销量" prop="sales">
+        <el-input v-model="productInfo.sales" />
       </el-form-item>
       <el-form-item label="排序" prop="sort">
         <el-input v-model="productInfo.sort" />
@@ -198,7 +202,6 @@
     </el-dialog>
 
   </div>
-
 </template>
 
 <script>
@@ -214,6 +217,7 @@ export default {
   data() {
     return {
       productInfo: {// 商品详情对象
+        id: 0,
         categoryId: 0,
         brandId: 0,
         shopId: 1, // 默认
@@ -222,7 +226,7 @@ export default {
         price: 0.00,
         originPrice: 0.00,
         stock: 0,
-        sales: 0, // 默认
+        sales: 0,
         sort: 0,
         intro: '',
         services: '',
@@ -230,6 +234,8 @@ export default {
       },
       sku: {// sku临时对象
         index: -1, // sku下标位置，修改时有效
+        id: 0,
+        productId: 0,
         skuName: '',
         price: 0,
         originPrice: 0,
@@ -244,16 +250,16 @@ export default {
       categoryFirstId: 0, // 一级分类id
       categorySecondId: 0, // 二级分类id
       categoryThirdId: 0, // 三级分类id
-      serviceIds: [], // 服务id数组
-      dialogFormVisible: false, // 添加sku文本框显示状态
-      headers: { 'authToken': getToken() },
-      // 校验规则
+      serviceIds: [], // 商品服务id
+      dialogFormVisible: false,
+      fileList: [], // 商品图片列表
+      // 表单校验
       rules: {
         productName: [{ required: true, message: '请输入商品名称', trigger: 'blur' }],
         categoryId: [{ required: true, message: '请选择商品分类', trigger: 'change' }],
         brandId: [{ required: true, message: '请选择商品品牌', trigger: 'change' }]
       },
-      skuRules: {}
+      headers: { authToken: getToken() }
     }
   },
   watch: {
@@ -262,6 +268,8 @@ export default {
         // 刷新catagory数据
         this.sku = {// sku临时对象
           index: -1,
+          id: 0,
+          productId: 0,
           skuName: '',
           price: 0,
           originPrice: 0,
@@ -290,12 +298,60 @@ export default {
       }
     })
   },
+  mounted() {
+    const params = this.$route.params
+    this.productInfo.id = params.id
+    this.loadProductInfo()
+  },
   methods: {
-    onSubmit() { // 提交添加
-      console.log(this.productInfo)
-      productInfoApi.addProductInfo(this.productInfo).then(response => {
-        this.$message.success('添加成功')
-        this.$router.push({ path: '/product-info/list' })
+    loadProductInfo() { // 加载商品信息
+      productInfoApi.getProductInfoById(this.productInfo.id).then(response => {
+        if (response.code === 0) {
+          this.productInfo = response.data
+          this.initCategory(this.productInfo.categoryId)
+          var imgArray = this.productInfo.productImg.split(',')
+          for (let i = 0; i < imgArray.length; i++) {
+            var imgUrl = imgArray[i]
+            if (imgUrl !== '') {
+              this.fileList.push({ url: imgUrl })
+            }
+          }
+        }
+        console.log(this.productInfo)
+      })
+    },
+    initCategory(value) { // 加载页面后初始化商品分类
+      // 获取一级分类id
+      var fistCategoryId = parseInt(value.toString().substring(0, 4))
+      for (let i = 0; i < this.productCategoryList.length; i++) {
+        if (this.productCategoryList[i].categoryId === fistCategoryId) {
+          this.productCategorySecondList = this.productCategoryList[i].children
+          this.categoryFirstId = fistCategoryId
+          if (this.productCategorySecondList.length !== 0) { // 存在二级分类
+            // 获取二级分类id
+            var secondCategoryId = parseInt(value.toString().substring(0, 7))
+            for (let j = 0; j < this.productCategorySecondList.length; j++) {
+              if (this.productCategorySecondList[j].categoryId === secondCategoryId) {
+                this.productCategoryThirdList = this.productCategorySecondList[j].children
+                this.categorySecondId = secondCategoryId
+                if (this.productCategoryThirdList.length !== 0) { // 存在三级分类
+                  // 获取三级分类id
+                  var thirdCategoryId = parseInt(value.toString().substring(0, value.length))
+                  this.categoryThirdId = thirdCategoryId
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    onSubmit() { // 提交修改
+      console.log(this.productInfo.skuList)
+      productInfoApi.updateProductCategory(this.productInfo.id, this.productInfo).then(respone => {
+        if (respone.code === 0) {
+          this.$message.success('修改成功')
+          this.$router.push({ path: '/product-info/list' })
+        }
       })
     },
     onCancel() {
@@ -337,18 +393,8 @@ export default {
         this.productInfo.productImg = this.productInfo.productImg + file.data.url + ','
       }
     },
-    handleServiceChange(val) {
-      console.log(val)
-    },
-    submitUpload() { // 上传SKU图片
-      this.$refs.upload.submit()
-    },
-    fileUploadSuccess(response) { // SKU图片上传成功回调
-      this.$message.success('文件上传成功')
-      this.sku.picture = response.data.url
-    },
-    fileUploadError() {
-      this.$message.error('文件上传失败')
+    handleServiceChange() {
+
     },
     addOrUpdateSku() { // 添加/修改SKU信息
       if (this.sku.index === -1) {
@@ -363,19 +409,34 @@ export default {
       // 关闭文本框
       this.dialogFormVisible = false
     },
+    submitUpload() { // 上传SKU图片
+      this.$refs.upload.submit()
+    },
+    fileUploadSuccess(response) { // SKU图片上传成功回调
+      this.$message.success('文件上传成功')
+      this.sku.picture = response.data.url
+    },
+    fileUploadError() {
+      this.$message.error('文件上传失败')
+    },
     handleEdit(index, row) { // 编辑SKU信息
-      console.log('sssssssssssssssssss')
       this.sku = this.productInfo.skuList[index]
       this.sku.index = index
       this.dialogFormVisible = true
     },
     handleDelete(index, row) { // 删除SKU信息
-      console.log('sssssssssssssssssss')
       this.productInfo.skuList.splice(index, 1)
     }
+
   }
 }
 </script>
+
+<style scoped>
+  .line {
+    text-align: center;
+  }
+</style>
 
 <style scoped>
 .tinymce-container {

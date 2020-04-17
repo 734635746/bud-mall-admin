@@ -98,6 +98,10 @@ export default {
     resetData() { // 清空
       this.searchObj = { productName: '' }
       this.loadList()
+    },
+    edit(index) { // 编辑商品
+      const data = this.list[index]
+      this.$router.push({ path: '/product-info/edit/' + data.id })
     }
   }
 }

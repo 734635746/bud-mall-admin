@@ -18,6 +18,21 @@ export default {
       method: 'POST',
       data: productInfo
     })
+  },
+
+  getProductInfoById(id) { // 根据id获取商品详情信息
+    return request({
+      url: `${api_name}` + `/` + id,
+      method: 'GET'
+    })
+  },
+
+  updateProductCategory(id, productInfo) { // 修改商品信息
+    return request({
+      url: `${api_name}` + `/` + id,
+      method: 'PUT',
+      data: productInfo
+    })
   }
 
 }
