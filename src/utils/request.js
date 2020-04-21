@@ -49,6 +49,8 @@ service.interceptors.response.use(
             location.reload()
           })
         })
+      } else if (res.code === 500) { // 错误码500 处理
+        Message.error(res.msg)
       }
       return Promise.reject(new Error(res.msg || 'Error'))
     } else {

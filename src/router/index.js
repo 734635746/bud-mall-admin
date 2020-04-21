@@ -123,7 +123,21 @@ export const constantRoutes = [
       }
     ]
   },
-
+  {
+    path: '/shoppingCart-product',
+    component: Layout,
+    redirect: '/shoppingCart-product/list',
+    name: '用户购物车商品管理',
+    meta: { title: '用户购物车商品管理', icon: 'shoppingCart' },
+    alwaysShow: true,
+    children: [
+      {
+        path: 'list',
+        component: () => import('@/views/shoppingCart-product/list'),
+        meta: { title: '用户购物车商品列表', icon: 'list' }
+      }
+    ]
+  },
   {
     path: '外链',
     component: Layout,
