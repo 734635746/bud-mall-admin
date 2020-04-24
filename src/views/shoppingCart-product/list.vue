@@ -37,8 +37,6 @@
       <el-table-column fixed="right" label="操作" width="100">
         <template slot-scope="scope">
 
-          <!-- <el-button type="danger" icon="el-icon-delete" size="small" @click="del(scope.$index)">删除</el-button> -->
-
           <el-popconfirm
             icon="el-icon-info"
             icon-color="red"

@@ -4,47 +4,14 @@
     <el-form ref="productInfoForm" :model="productInfo" label-width="120px" :rules="rules">
       <!--商品分类-->
       <el-form-item label="商品分类" prop="categoryId">
-        <!--一级分类-->
-        <el-select
-          v-model="categoryFirstId"
-          placeholder="请选择"
-          @change="categoryOneChanged"
-        >
-          <el-option
-            v-for="category in productCategoryList"
-            :key="category.categoryId"
-            :label="category.categoryName"
-            :value="category.categoryId"
+        <div class="block">
+          <el-cascader
+            v-model="productInfo.categoryId"
+            placeholder="请选择商品分类"
+            :options="productCategoryList"
+            :props="{ expandTrigger: 'hover' ,label:'categoryName', value:'categoryId',emitPath:false}"
           />
-        </el-select>
-        <!--二级分类-->
-        <el-select
-          v-if="productCategorySecondList.length!=0"
-          v-model="categorySecondId"
-          placeholder="请选择"
-          @change="categorySecondChanged"
-        >
-          <el-option
-            v-for="category in productCategorySecondList"
-            :key="category.categoryId"
-            :label="category.categoryName"
-            :value="category.categoryId"
-          />
-        </el-select>
-        <!--三级分类-->
-        <el-select
-          v-if="productCategoryThirdList.length!=0"
-          v-model="categoryThirdId"
-          placeholder="请选择"
-          @change="categoryThirdChanged"
-        >
-          <el-option
-            v-for="category in productCategoryThirdList"
-            :key="category.categoryId"
-            :label="category.categoryName"
-            :value="category.categoryId"
-          />
-        </el-select>
+        </div>
       </el-form-item>
 
       <el-form-item label="商品品牌" prop="brandId">
@@ -245,11 +212,6 @@ export default {
       productBrandList: [], // 商品品牌列表
       productServiceList: [], // 商品服务列表
       productCategoryList: [], // 商品分类列表
-      productCategorySecondList: [], // 商品二级分类列表
-      productCategoryThirdList: [], // 商品三级分类列表
-      categoryFirstId: 0, // 一级分类id
-      categorySecondId: 0, // 二级分类id
-      categoryThirdId: 0, // 三级分类id
       serviceIds: [], // 商品服务id
       dialogFormVisible: false,
       fileList: [], // 商品图片列表
@@ -289,7 +251,7 @@ export default {
     })
     productCategoryApi.getList().then(response => { // 获取商品分类列表
       if (response.code === 0) {
-        this.productCategoryList = response.data
+        this.productCategoryList = this.getTreeData(response.data)
       }
     })
     productServiceApi.getList().then(response => { // 获取商品服务列表
@@ -308,7 +270,7 @@ export default {
       productInfoApi.getProductInfoById(this.productInfo.id).then(response => {
         if (response.code === 0) {
           this.productInfo = response.data
-          this.initCategory(this.productInfo.categoryId)
+          // this.initCategory(this.productInfo.categoryId)
           var imgArray = this.productInfo.productImg.split(',')
           for (let i = 0; i < imgArray.length; i++) {
             var imgUrl = imgArray[i]
@@ -319,31 +281,6 @@ export default {
         }
         console.log(this.productInfo)
       })
-    },
-    initCategory(value) { // 加载页面后初始化商品分类
-      // 获取一级分类id
-      var fistCategoryId = parseInt(value.toString().substring(0, 4))
-      for (let i = 0; i < this.productCategoryList.length; i++) {
-        if (this.productCategoryList[i].categoryId === fistCategoryId) {
-          this.productCategorySecondList = this.productCategoryList[i].children
-          this.categoryFirstId = fistCategoryId
-          if (this.productCategorySecondList.length !== 0) { // 存在二级分类
-            // 获取二级分类id
-            var secondCategoryId = parseInt(value.toString().substring(0, 7))
-            for (let j = 0; j < this.productCategorySecondList.length; j++) {
-              if (this.productCategorySecondList[j].categoryId === secondCategoryId) {
-                this.productCategoryThirdList = this.productCategorySecondList[j].children
-                this.categorySecondId = secondCategoryId
-                if (this.productCategoryThirdList.length !== 0) { // 存在三级分类
-                  // 获取三级分类id
-                  var thirdCategoryId = parseInt(value.toString().substring(0, value.length))
-                  this.categoryThirdId = thirdCategoryId
-                }
-              }
-            }
-          }
-        }
-      }
     },
     onSubmit() { // 提交修改
       console.log(this.productInfo.skuList)
@@ -356,36 +293,6 @@ export default {
     },
     onCancel() {
       this.$router.push({ path: '/product-info/list' })
-    },
-    // 一级分类选项变化回调方法
-    categoryOneChanged(value) {
-      // 清除下级分类列表和分类id
-      this.productCategoryThirdList = []
-      this.productCategorySecondList = []
-      this.categorySecondId = 0
-      this.categoryThirdId = 0
-      for (let i = 0; i < this.productCategoryList.length; i++) {
-        if (this.productCategoryList[i].categoryId === value) {
-          this.productCategorySecondList = this.productCategoryList[i].children
-          this.productInfo.categoryId = this.categoryFirstId
-        }
-      }
-    },
-    // 二级分类选项变化回调方法
-    categorySecondChanged(value) {
-      // 清除下级分类列表
-      this.productCategoryThirdList = []
-      this.categoryThirdId = 0
-      for (let i = 0; i < this.productCategorySecondList.length; i++) {
-        if (this.productCategorySecondList[i].categoryId === value) {
-          this.productCategoryThirdList = this.productCategorySecondList[i].children
-          this.productInfo.categoryId = this.categorySecondId
-        }
-      }
-    },
-    // 三级分类选项变化回调方法
-    categoryThirdChanged(value) {
-      this.productInfo.categoryId = this.categoryThirdId
     },
     // 商品图片上传成功回调
     handleSuccess(file) {
@@ -426,6 +333,19 @@ export default {
     },
     handleDelete(index, row) { // 删除SKU信息
       this.productInfo.skuList.splice(index, 1)
+    },
+    getTreeData(data) {
+      // 循环遍历json数据
+      for (var i = 0; i < data.length; i++) {
+        if (data[i].children.length < 1) {
+          // children若为空数组，则将children设为undefined
+          data[i].children = undefined
+        } else {
+          // children若不为空数组，则继续 递归调用 本方法
+          this.getTreeData(data[i].children)
+        }
+      }
+      return data
     }
 
   }

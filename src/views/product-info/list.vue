@@ -35,8 +35,17 @@
       <el-table-column label="库存" prop="stock" />
       <el-table-column fixed="right" label="操作" width="100">
         <template slot-scope="scope">
-          <el-button type="text" size="small" @click="edit(scope.$index)">编辑</el-button>
-          <el-button type="text" size="small" @click="del(scope.$index)">删除</el-button>
+          <el-button type="primary" icon="el-icon-edit" size="small" @click="edit(scope.$index)">编辑</el-button>
+          <el-popconfirm
+            icon="el-icon-info"
+            icon-color="red"
+            cancel-button-type="info"
+            confirm-button-type="danger"
+            title="确定删除此商品吗？"
+            @onConfirm="del(scope.$index)"
+          >
+            <el-button slot="reference" type="danger" icon="el-icon-delete" size="small">删除</el-button>
+          </el-popconfirm>
         </template>
       </el-table-column>
     </el-table>
@@ -102,6 +111,13 @@ export default {
     edit(index) { // 编辑商品
       const data = this.list[index]
       this.$router.push({ path: '/product-info/edit/' + data.id })
+    },
+    del(index) { // 删除商品
+      const data = this.list[index]
+      productInfoApi.deleteProductInfo(data.id).then(response => {
+        this.$message.success('删除成功')
+        this.loadList()
+      })
     }
   }
 }

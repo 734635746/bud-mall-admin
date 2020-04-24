@@ -139,6 +139,41 @@ export const constantRoutes = [
     ]
   },
   {
+    path: '/banner',
+    component: Layout,
+    redirect: '/banner/firstPosition/list',
+    name: '界面横幅管理',
+    meta: { title: '界面横幅管理', icon: 'banner' },
+    alwaysShow: true,
+    children: [
+      {
+        path: 'firstPosition/list',
+        component: () => import('@/views/banner/firstPosition/list'),
+        meta: { title: '第一处横幅列表', icon: 'list' }
+      },
+      {
+        path: 'secondPosition/list',
+        component: () => import('@/views/banner/secondPosition/list'),
+        meta: { title: '第二处横幅列表', icon: 'list' }
+      }
+    ]
+  },
+  {
+    path: '/navigation',
+    component: Layout,
+    redirect: '/navigation/list',
+    name: '界面导航管理',
+    meta: { title: '界面导航管理', icon: 'navigation' },
+    alwaysShow: true,
+    children: [
+      {
+        path: 'list',
+        component: () => import('@/views/navigation/list'),
+        meta: { title: '导航列表', icon: 'list' }
+      }
+    ]
+  },
+  {
     path: '外链',
     component: Layout,
     children: [

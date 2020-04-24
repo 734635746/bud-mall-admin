@@ -33,6 +33,13 @@ export default {
       method: 'PUT',
       data: productInfo
     })
+  },
+
+  deleteProductInfo(id) { // 删除商品
+    return request({
+      url: `${api_name}` + `/` + id,
+      method: 'DELETE'
+    })
   }
 
 }
