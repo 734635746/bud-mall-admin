@@ -31,8 +31,10 @@
       <el-form-item label="商品图片" prop="productImg">
         <el-upload
           class="upload-demo"
-          action="/admapi/file"
+          action="admapi/file"
           :on-success="handleSuccess"
+          :file-list="fileList"
+          :on-remove="handleRemove"
           :headers="headers"
           list-type="picture"
         >
@@ -148,7 +150,7 @@
           <el-upload
             ref="upload"
             class="upload-demo"
-            action="/admapi/file"
+            action="admapi/file"
             :headers="headers"
             :limit="1"
             :on-success="fileUploadSuccess"
@@ -207,6 +209,7 @@ export default {
         stock: 0,
         picture: ''
       },
+      fileList: [], // 商品图片列表
       productBrandList: [], // 商品品牌列表
       productServiceList: [], // 商品服务列表
       productCategoryList: [], // 商品分类列表
@@ -269,9 +272,24 @@ export default {
     },
     // 商品图片上传成功回调
     handleSuccess(file) {
-      if (file.code === 0) {
-        this.productInfo.productImg = this.productInfo.productImg + file.data.url + ','
+      this.fileList.push({ url: file.data.url })
+      this.productInfo.productImg = this.productInfo.productImg + file.data.url + ','
+    },
+    // 商品图片列表移除回调
+    handleRemove(file) {
+      console.log(file.url)
+      // 处理上传组件的图片列表
+      var imgArray = this.productInfo.productImg.split(',')
+      // 新的图片url信息
+      var newImg = ''
+      for (let i = 0; i < imgArray.length; i++) {
+        var imgUrl = imgArray[i]
+        console.log('blob:' + imgUrl)
+        if (imgUrl !== file.url && imgUrl !== '') {
+          newImg = newImg + imgUrl + ','
+        }
       }
+      this.productInfo.productImg = newImg
     },
     handleServiceChange(val) {
       console.log(val)

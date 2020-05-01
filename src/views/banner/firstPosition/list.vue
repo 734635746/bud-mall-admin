@@ -57,7 +57,7 @@
           <el-upload
             ref="upload"
             class="upload-demo"
-            action="/admapi/file"
+            action="admapi/file"
             :headers="headers"
             :limit="1"
             :on-exceed="handleExceed"
@@ -94,7 +94,7 @@
           <el-upload
             ref="upload"
             class="upload-demo"
-            action="/admapi/file"
+            action="admapi/file"
             :headers="headers"
             :limit="1"
             :on-exceed="handleExceed"
