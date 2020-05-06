@@ -32,6 +32,14 @@
           >
             修改
           </el-button>
+
+          <el-button
+            type="text"
+            size="mini"
+            @click="deleteProductCategory(data)"
+          >
+            删除
+          </el-button>
         </span>
       </span>
     </el-tree>
@@ -157,6 +165,22 @@ export default {
           }
         })
       }
+    },
+    deleteProductCategory(data) { // 删除商品分类
+      this.$confirm('确定删除该商品分类及其子分类?', '提示', {
+        confirmButtonText: '确定',
+        cancelButtonText: '取消',
+        type: 'warning'
+      }).then(() => {
+        return categoryApi.removeByCategoryId(data.categoryId)
+      }).then(() => { // 上一个then成功则返回这里
+        this.fetchCategoryList()// 刷新页面
+        this.$message.success('删除成功')
+      }).catch((response) => {
+        if (response === 'cancel') {
+          this.$message.info('已取消删除')
+        }
+      })
     },
     PaddingCategory(data) { // 修改商品分类信息时，填充信息
       this.category = data

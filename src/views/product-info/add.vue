@@ -284,7 +284,6 @@ export default {
       var newImg = ''
       for (let i = 0; i < imgArray.length; i++) {
         var imgUrl = imgArray[i]
-        console.log('blob:' + imgUrl)
         if (imgUrl !== file.url && imgUrl !== '') {
           newImg = newImg + imgUrl + ','
         }

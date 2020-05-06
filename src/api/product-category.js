@@ -23,6 +23,13 @@ export default {
       method: 'PUT',
       data: productCategory
     })
+  },
+
+  removeByCategoryId(categoryId) {
+    return request({
+      url: `${api_name}/` + categoryId,
+      method: 'DELETE'
+    })
   }
 
 }
