@@ -8,7 +8,7 @@
             v-model="productInfo.categoryId"
             placeholder="请选择商品分类"
             :options="productCategoryList"
-            :props="{ expandTrigger: 'hover' ,label:'categoryName', value:'categoryId',emitPath:false}"
+            :props="{ expandTrigger: 'hover' ,label:'categoryName', value:'id',emitPath:false}"
           />
         </div>
       </el-form-item>

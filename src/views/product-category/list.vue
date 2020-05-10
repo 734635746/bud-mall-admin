@@ -87,8 +87,8 @@ import categoryApi from '@/api/product-category'
 import { getToken } from '@/utils/auth'
 
 const defaultCategory = {
-  categoryId: 0,
-  parentId: 0,
+  categoryId: '',
+  parentId: '0',
   categoryName: '',
   icon: '',
   sort: 0
@@ -107,8 +107,8 @@ export default {
       dialogFormVisible: false,
       // 添加分类信息
       category: {
-        categoryId: 0, // 分类id，修改时有效
-        parentId: 0, // 父级id，添加时有效
+        categoryId: '', // 分类id，修改时有效
+        parentId: '0', // 父级id，添加时有效
         categoryName: '',
         icon: '',
         sort: 0
@@ -144,7 +144,7 @@ export default {
     },
     addOrUpdateCategory() { // 添加或者修改商品分类
       console.log(this.category)
-      if (this.category.categoryId === 0) { // 添加操作
+      if (this.category.categoryId === '') { // 添加操作
         categoryApi.addProductCategory(this.category).then(response => {
           if (response.code === 0) {
             this.$message.success('添加成功')
