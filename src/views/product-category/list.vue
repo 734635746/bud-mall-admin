@@ -10,6 +10,7 @@
       class="filter-tree"
       default-expand-all
       node-key="id"
+      :expand-on-click-node="false"
     >
       <span slot-scope="{ node , data}" class="custom-tree-node">
 

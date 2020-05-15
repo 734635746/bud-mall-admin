@@ -124,6 +124,21 @@ export const constantRoutes = [
     ]
   },
   {
+    path: '/product-spec',
+    component: Layout,
+    redirect: '/product-spec/list',
+    name: '商品规格属性管理',
+    meta: { title: '商品规格属性管理', icon: 'form' },
+    alwaysShow: true,
+    children: [
+      {
+        path: 'list',
+        component: () => import('@/views/product-spec/list'),
+        meta: { title: '商品规格属性列表', icon: 'list' }
+      }
+    ]
+  },
+  {
     path: '/shoppingCart-product',
     component: Layout,
     redirect: '/shoppingCart-product/list',
