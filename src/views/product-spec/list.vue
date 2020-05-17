@@ -11,7 +11,7 @@
       :props="defaultProps"
       :filter-node-method="filterNode"
       class="filter-tree"
-      default-expand-all
+      :default-expand-all="false"
       node-key="id"
       :expand-on-click-node="false"
     >

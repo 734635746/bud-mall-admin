@@ -261,7 +261,6 @@ export default {
   },
   methods: {
     onSubmit() { // 提交添加
-      console.log(this.productInfo)
       productInfoApi.addProductInfo(this.productInfo).then(response => {
         this.$message.success('添加成功')
         this.$router.push({ path: '/product-info/list' })

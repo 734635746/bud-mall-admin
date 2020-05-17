@@ -110,14 +110,25 @@ export const constantRoutes = [
         component: () => import('@/views/product-info/list'),
         meta: { title: '商品详情信息列表', icon: 'list' }
       },
+      // {
+      //   path: 'add',
+      //   component: () => import('@/views/product-info/add'),
+      //   meta: { title: '添加商品', icon: 'add' }
+      // },
+      // {
+      //   path: 'edit/:id',
+      //   component: () => import('@/views/product-info/edit'),
+      //   meta: { title: '编辑商品' },
+      //   hidden: true
+      // }
       {
         path: 'add',
-        component: () => import('@/views/product-info/add'),
+        component: () => import('@/views/product-info/info'),
         meta: { title: '添加商品', icon: 'add' }
       },
       {
         path: 'edit/:id',
-        component: () => import('@/views/product-info/edit'),
+        component: () => import('@/views/product-info/info'),
         meta: { title: '编辑商品' },
         hidden: true
       }
@@ -128,7 +139,7 @@ export const constantRoutes = [
     component: Layout,
     redirect: '/product-spec/list',
     name: '商品规格属性管理',
-    meta: { title: '商品规格属性管理', icon: 'form' },
+    meta: { title: '商品规格属性管理', icon: 'spec' },
     alwaysShow: true,
     children: [
       {
