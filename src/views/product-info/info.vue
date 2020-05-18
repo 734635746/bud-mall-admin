@@ -197,16 +197,6 @@ export default {
         services: '',
         skuList: []
       },
-      // sku: {// sku临时对象
-      //   index: -1, // sku下标位置，修改时有效
-      //   id: 0,
-      //   productId: 0,
-      //   skuName: '',
-      //   price: 0,
-      //   originPrice: 0,
-      //   stock: 0,
-      //   picture: ''
-      // },
       productBrandList: [], // 商品品牌列表
       productServiceList: [], // 商品服务列表
       productCategoryList: [], // 商品分类列表
@@ -252,11 +242,17 @@ export default {
           skuSpecIdList.push(this.skuSpecList[i].id)
         }
         this.skuSpecIdList = skuSpecIdList
-        // 更新商品的skuList
-        this.refreshSkuList()
       },
       immediate: true
       // deep: true
+    },
+    productSpecList: {// 商品规格初始化完成后
+      handler: function() {
+        // 初始化skuSpecList
+        this.initSkuSpecList()
+        // 初始化specValueMap
+        this.initSpecValueMap()
+      }
     }
   },
   created() {
@@ -277,6 +273,7 @@ export default {
     const params = this.$route.params
     if (params.id !== undefined) { // id不是未定义则此次操作是修改操作
       this.productInfo.id = params.id
+      // 加载商品信息
       this.loadProductInfo()
     }
   },
@@ -286,6 +283,7 @@ export default {
       productInfoApi.getProductInfoById(this.productInfo.id).then(response => {
         if (response.code === 0) {
           this.productInfo = response.data
+
           // 处理上传组件的图片列表
           var imgArray = this.productInfo.productImg.split(',')
           for (let i = 0; i < imgArray.length; i++) {
@@ -294,7 +292,8 @@ export default {
               this.fileList.push({ url: imgUrl })
             }
           }
-          console.log(this.productInfo)
+          // 处理商品的skuList列表
+          this.loadSkuList()
         }
       })
     },
@@ -376,13 +375,13 @@ export default {
               var skuSpec = this.productSpecList[i]
               // 更新当前商品的规格列表
               this.skuSpecList.push({ id: skuSpec.id, specName: skuSpec.specName })
-              // 更新规格属性值Map列表
-              this.specValueMap[this.currentSpecId] = skuSpec.values
               break
             }
           }
-          // 更新商品的skuList
-          // this.refreshSkuList()
+          this.$nextTick(() => {
+            // 更新商品的skuList
+            this.refreshSkuList()
+          })
         }
       }
     },
@@ -394,13 +393,16 @@ export default {
           break
         }
       }
-      // 更新商品的skuList
-      // this.refreshSkuList()
+      this.$nextTick(() => {
+        // 更新商品的skuList
+        this.refreshSkuList()
+      })
     },
     refreshSkuList() { // 刷新商品的skuList
       var skuList = []
       var arr = []
       // 根据specid列表，将对应的属性值对象加入列表
+
       for (let i = 0; i < this.skuSpecIdList.length; i++) {
         arr.push(this.specValueMap[this.skuSpecIdList[i]])
       }
@@ -489,7 +491,7 @@ export default {
         var skuSpecValueList = []
         for (let j = 0; j < attrValueNameList.length; j++) {
           var specValue = {}
-          specValue.specName = attrValueNameList[j]
+          specValue.specValueName = attrValueNameList[j]
           var specIdList = attrValueIdsList[j].split(':')
           specValue.specId = parseInt(specIdList[0])
           specValue.specValueId = parseInt(specIdList[1])
@@ -509,10 +511,40 @@ export default {
     // 根据specId获取specValueName
     getSpecValueName(skuSpecValueList, specId) {
       var sku = skuSpecValueList.filter(item => {
-        console.log(item.specId + '   ' + specId)
         return item.specId === specId
       })
-      return sku[0].specName
+      return sku[0].specValueName
+    },
+    // 加载并处理商品的skuList
+    loadSkuList() {
+      // 处理skuList
+      var _skuList = this.productInfo.skuList
+      var skuList = this.handleSkuList(_skuList)
+      this.productInfo.skuList = skuList
+    },
+    // 初始化skuSpecList
+    initSkuSpecList() {
+      var specMap = {}
+      for (let i = 0; i < this.productSpecList.length; i++) {
+        var spec = this.productSpecList[i]
+        specMap[spec.id] = spec.specName
+      }
+      this.specMap = specMap
+
+      if (this.productInfo.skuList.length > 0) {
+        var sku = this.productInfo.skuList[0]
+        for (let j = 0; j < sku.skuSpecValueList.length; j++) {
+          var specValue = sku.skuSpecValueList[j]
+          this.skuSpecList.push({ id: specValue.specId, specName: specMap[specValue.specId] })
+        }
+      }
+    },
+    // 初始化specValueMap
+    initSpecValueMap() {
+      for (let j = 0; j < this.productSpecList.length; j++) {
+        var spec = this.productSpecList[j]
+        this.specValueMap[spec.id] = spec.values
+      }
     }
 
   }
