@@ -137,21 +137,25 @@
                 <el-input v-model="scope.row.stock" />
               </template>
             </el-table-column>
-            <!-- <el-form-item label="SKU图片">
+            <el-table-column label="图片" align="center">
+              <template slot-scope="scope">
+                <el-upload
+                  ref="upload"
+                  :key="scope.row._time"
+                  class="upload-demo"
+                  action="admapi/file"
+                  :headers="headers"
+                  :limit="1"
+                  :on-success="fileUploadSuccess"
+                  :on-error="fileUploadError"
+                  :on-remove="()=>{currentSkuIndex=scope.$index,fileRemove()}"
+                  :on-exceed="fileExceed"
+                >
+                  <el-button slot="trigger" size="small" type="primary" @click="()=>(currentSkuIndex=scope.$index)">选择图片</el-button>
 
-              <el-upload
-                ref="upload"
-                class="upload-demo"
-                action="admapi/file"
-                :headers="headers"
-                :limit="1"
-                :on-success="fileUploadSuccess"
-                :on-error="fileUploadError"
-              >
-                <el-button slot="trigger" size="small" type="primary">选择图片</el-button>
-
-              </el-upload>
-            </el-form-item> -->
+                </el-upload>
+              </template>
+            </el-table-column>
 
           </el-table>
         </template>
@@ -208,6 +212,7 @@ export default {
       currentSpecId: '', // 当前选定的规格Id
       serviceIds: [], // 商品服务id
       fileList: [], // 商品图片列表
+      currentSkuIndex: -1, // 当前操作sku的下标
       // 表单校验
       rules: {
         productName: [{ required: true, message: '请输入商品名称', trigger: 'blur' }],
@@ -218,23 +223,6 @@ export default {
     }
   },
   watch: {
-    // dialogFormVisible(val) {
-    //   if (val === false) { // 监听文本框的状态，关闭文本框怎进行数据刷新
-    //     // 刷新catagory数据
-    //     this.sku = {// sku临时对象
-    //       index: -1,
-    //       id: 0,
-    //       productId: 0,
-    //       skuName: '',
-    //       price: 0,
-    //       originPrice: 0,
-    //       stock: 0,
-    //       picture: ''
-    //     }
-    //     // 清除文件上传控件的文件列表
-    //     this.$refs.upload.clearFiles()
-    //   }
-    // },
     skuSpecList: {// 当sku规格列表变化时，更新sku规格id列表
       handler: function() {
         var skuSpecIdList = []
@@ -342,12 +330,21 @@ export default {
 
     },
     // SKU图片上传成功回调
-    fileUploadSuccess(response) {
+    fileUploadSuccess(response, file, fileList) {
+      var index = this.currentSkuIndex
+      this.productInfo.skuList[index].picture = response.data.url
+      console.log(this.productInfo.skuList)
       this.$message.success('文件上传成功')
-      this.sku.picture = response.data.url
     },
     fileUploadError() {
       this.$message.error('文件上传失败')
+    },
+    fileExceed() {
+      this.$message.info('只能上传一个文件!如果要重新上传,请先移除原来的文件!')
+    },
+    fileRemove() {
+      var index = this.currentSkuIndex
+      this.productInfo.skuList[index].picture = ''
     },
     // 处理分类列表子类为空数组的问题
     getTreeData(data) {
