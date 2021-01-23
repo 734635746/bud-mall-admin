@@ -233,14 +233,6 @@ export default {
       },
       immediate: true
       // deep: true
-    },
-    productSpecList: {// 商品规格初始化完成后
-      handler: function() {
-        // 初始化skuSpecList
-        this.initSkuSpecList()
-        // 初始化specValueMap
-        this.initSpecValueMap()
-      }
     }
   },
   created() {
@@ -255,6 +247,12 @@ export default {
     })
     productSpecApi.getList().then(response => { // 获取sku规格列表
       this.productSpecList = response.data
+      console.log('33333')
+      // 初始化skuSpecList
+      this.initSkuSpecList()
+      // 初始化specValueMap
+      this.initSpecValueMap()
+      console.log('44444')
     })
   },
   mounted() {
@@ -262,7 +260,9 @@ export default {
     if (params.id !== undefined) { // id不是未定义则此次操作是修改操作
       this.productInfo.id = params.id
       // 加载商品信息
+      console.log('11111')
       this.loadProductInfo()
+      console.log('22222')
     }
   },
   methods: {
